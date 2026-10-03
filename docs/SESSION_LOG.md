@@ -11,5 +11,6 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
 - **Pruebas y resultado:** `git init` OK; scaffold verificado en `git status`. Ninguna prueba técnica — fase documental.
 - **Decisiones/permiso:** usuario aprobó gate CONSTRUIR + modo automático + repo separado (no tocar `demo/` ni el hermano) + remoto GitHub. Excepción registrada: build sin entrevistas de validación completadas.
 - **Bloqueos:** ninguno.
-- **Siguiente acción:** fase SPEC — `sdd/changes/claro/spec.md`.
-- **Engram topic_key:** `sdd/claro/proposal`, `decision/claro-*`.
+- **Continuación (misma sesión, modo automático):** fases documentales SDD completas — `sdd/changes/claro/spec.md` (R-01..R-09, CA-1..CA-14, INV-1..INV-6), `design.md` (9/9 decisiones: sin programa custom, @solana/kit 8 tx v1, reference-as-account Solana Pay, memo-anchor firmado por trabajador, node:sqlite, payer pool ×5, T2 diferido, tiempo honesto), `tasks.md` (S1..S7 verticales) + `test-plan.md`; `docs/05`, `06`, `07` escritos; commit `3c459e5` pusheado a `adriangmrraa/claro` (rebase sobre LICENSE inicial).
+- **Siguiente acción:** APPLY — S1 scaffold.
+- **Engram topic_key:** `sdd/claro/*`, `decision/claro-gate-build`.

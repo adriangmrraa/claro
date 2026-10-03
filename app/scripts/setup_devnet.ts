@@ -126,12 +126,15 @@ function writeEnvLocal(vars: Record<string, string>) {
     if (m) map.set(m[1], m[2]);
   }
   for (const [k, v] of Object.entries(vars)) map.set(k, v);
+  const cluster = RPC_URL.includes("devnet")
+    ? "devnet"
+    : `custom&customUrl=${encodeURIComponent(RPC_URL)}`;
   const body = [
     "# CLARO — devnet only. Generado por scripts/setup_devnet.ts. NUNCA commitear.",
-    "SOLANA_RPC_URL=https://api.devnet.solana.com",
-    "SOLANA_WS_URL=wss://api.devnet.solana.com",
-    "NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com",
-    "NEXT_PUBLIC_CLUSTER=devnet",
+    `SOLANA_RPC_URL=${RPC_URL}`,
+    `SOLANA_WS_URL=${WS_URL}`,
+    `NEXT_PUBLIC_SOLANA_RPC_URL=${RPC_URL}`,
+    `NEXT_PUBLIC_CLUSTER=${cluster}`,
     `CLARO_SESSION_SECRET=${map.get("CLARO_SESSION_SECRET") ?? "claro-dev-secret-change-me"}`,
     ...Object.entries(vars).map(([k, v]) => `${k}=${v}`),
     "",

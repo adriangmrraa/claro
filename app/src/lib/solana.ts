@@ -14,11 +14,10 @@ import {
   assertIsTransactionWithBlockhashLifetime,
   createKeyPairSignerFromPrivateKeyBytes,
   createSolanaRpc,
-  createSolanaRpcSubscriptions,
   createTransactionMessage,
+  getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
   pipe,
-  sendAndConfirmTransactionFactory,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
@@ -27,6 +26,7 @@ import {
   type Instruction,
   type KeyPairSigner,
   type Signature,
+  type Transaction,
 } from "@solana/kit";
 import {
   findAssociatedTokenPda,
@@ -50,8 +50,50 @@ export function usdcMint(): Address {
 }
 
 export const rpc = createSolanaRpc(env.rpcUrl);
-const rpcSubscriptions = createSolanaRpcSubscriptions(env.wsUrl);
-const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+
+async function pollStatus(sig: Signature, timeoutMs: number): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const { value } = await rpc
+      .getSignatureStatuses([sig])
+      .send();
+    const st = value[0];
+    if (st) {
+      if (st.err) throw new Error(`transaction failed: ${JSON.stringify(st.err)}`);
+      if (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized") return;
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  throw new Error("transaction confirmation timeout");
+}
+
+// Raw JSON-RPC send + status polling. Retries cover transient RPC failures
+// (e.g. surfpool's lazy remote account fetches on flaky networks); resending
+// the same signed tx is idempotent — it carries the same signature.
+export async function sendAndConfirmHttp(
+  signedTx: Transaction & { lifetimeConstraint?: unknown },
+  timeoutMs = 60_000
+): Promise<void> {
+  const signature = getSignatureFromTransaction(signedTx);
+  const wire = getBase64EncodedWireTransaction(signedTx);
+
+  let lastError: unknown = null;
+  let sent = false;
+  for (let attempt = 0; attempt < 8 && !sent; attempt++) {
+    try {
+      await rpc
+        .sendTransaction(wire, { encoding: "base64", skipPreflight: true })
+        .send();
+      sent = true;
+    } catch (e) {
+      lastError = e;
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
+  if (!sent) throw lastError instanceof Error ? lastError : new Error(String(lastError));
+
+  await pollStatus(signature, timeoutMs);
+}
 
 // --- signers (devnet demo only; worker keys are client-side, never here) ---
 
@@ -132,7 +174,7 @@ export async function sendSolTransfer(params: {
   );
   const signedTx = await signTransactionMessageWithSigners(message);
   assertIsTransactionWithBlockhashLifetime(signedTx);
-  await sendAndConfirm(signedTx, { commitment: "confirmed" });
+  await sendAndConfirmHttp(signedTx);
   return getSignatureFromTransaction(signedTx);
 }
 
@@ -192,7 +234,7 @@ export async function sendUsdcPayment(input: UsdcPaymentInput): Promise<string> 
 
   const signedTx = await signTransactionMessageWithSigners(message);
   assertIsTransactionWithBlockhashLifetime(signedTx);
-  await sendAndConfirm(signedTx, { commitment: "confirmed" });
+  await sendAndConfirmHttp(signedTx);
   return getSignatureFromTransaction(signedTx);
 }
 

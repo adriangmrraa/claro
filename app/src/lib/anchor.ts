@@ -22,7 +22,7 @@ import { getAddMemoInstruction } from "@solana-program/memo";
 import { loadWorkerSigner } from "./wallet";
 
 const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
-const WS_URL = RPC_URL.replace(/^http/, "ws");
+const WS_URL = process.env.NEXT_PUBLIC_SOLANA_WS_URL ?? RPC_URL.replace(/^http/, "ws");
 
 // Returns the confirmed signature, or throws with a user-safe message.
 export async function anchorReportOnChain(memo: string): Promise<string> {
@@ -54,6 +54,26 @@ export async function anchorReportOnChain(memo: string): Promise<string> {
 
   const signedTx = await signTransactionMessageWithSigners(message);
   assertIsTransactionWithBlockhashLifetime(signedTx);
-  await sendAndConfirm(signedTx, { commitment: "confirmed" });
-  return getSignatureFromTransaction(signedTx);
+  const signature = getSignatureFromTransaction(signedTx);
+
+  // WS send+confirm first; if it throws, the tx may still have landed —
+  // poll the signature status as fallback.
+  try {
+    await sendAndConfirm(signedTx, { commitment: "confirmed" });
+    return signature;
+  } catch {
+    const deadline = Date.now() + 60_000;
+    while (Date.now() < deadline) {
+      const { value } = await rpc.getSignatureStatuses([signature]).send();
+      const st = value[0];
+      if (st) {
+        if (st.err) throw new Error("La transacción falló — nada se cobró");
+        if (st.confirmationStatus === "confirmed" || st.confirmationStatus === "finalized") {
+          return signature;
+        }
+      }
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    throw new Error("La transacción tarda en confirmarse — revisá de nuevo en un momento");
+  }
 }

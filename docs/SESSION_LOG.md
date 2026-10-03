@@ -36,3 +36,13 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
 - **Commits:** `4d33e75` (S1), `48dbd8f` (S3), `d71177a` (S4+S5+S6), `6eda814` (S7) — todos pusheados a `adriangmrraa/claro` main.
 - **Siguiente acción:** conseguir SOL devnet → setup_devnet.ts → E2E real → VERIFY + ARCHIVE.
 - **Engram topic_key:** `sdd/claro/apply`.
+
+## Sesión 1 (cont. 3) — E2E real en surfpool + fix confirmación — 03/10/2026
+
+- **Meta:** verificar el loop completo con txs reales tras el bloqueo del faucet devnet.
+- **Contexto:** faucet devnet 429 persistente → Surfpool instalado en WSL (`~/.local/bin/surfpool`) como simnet local con fork de devnet (RPC `localhost:8899`, WS `8900`, daemon `--ci --daemon --host 0.0.0.0` — alcanzable desde Windows).
+- **Debug real (causa raíz por capas):** (1) kit `sendAndConfirm` WS crasheaba parseando errores de surfnet sin campo `data` (`Cannot destructure 'err'`); (2) `sendTransaction` HTTP en surfnet modo `--offline` acepta pero nunca procesa → `InvalidProgramForExecution` (programa Memo no existe en genesis offline); (3) en modo fork, el `sendTransaction` falla intermitente con `Failed to fetch accounts from remote` — WSL tiene conectividad flaky a devnet; (4) la simulación de la tx SIEMPRE pasó limpia (err:null) — la construcción es correcta.
+- **Fix:** `sendAndConfirmHttp` en `lib/solana.ts` — `sendTransaction` HTTP con 8 reintentos (idempotente por firma) + polling `getSignatureStatuses`; mismo patrón en `anchor.ts` (cliente).
+- **E2E VERIFICADO REAL (surfpool fork devnet):** `scripts/e2e_localnet.ts` — los 7 beats completos: sesión+cookie, wallet solo-pubkey, link con reference, checkout público, **2 pagos USDC reales confirmados onchain de payers distintos** (`27nHe2TNGk…`, `MLTP2Ea3z…`), sync clasificando 2 txs, informe con hash `b8404a0c…`, **ancla memo firmada por el trabajador onchain** (`5rfwuShD…`), página `/verificar` con todos los checks. Commit `027aabf`.
+- **Nota honesta:** las txs verificadas son REALES pero en surfnet local (fork de devnet), NO en devnet público — explorer público no las muestra. Falta: SOL devnet real → mismo setup + e2e contra `api.devnet.solana.com`.
+- **Siguiente acción:** captcha faucet.solana.com para mint authority → `setup_devnet.ts` (apuntando a devnet) → `e2e_localnet.ts` con `E2E_BASE_URL` + RPC devnet → VERIFY + ARCHIVE.

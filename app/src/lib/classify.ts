@@ -44,11 +44,11 @@ export function classifyPayment(p: PaymentFactInput): ClassifiedPayment {
   if (amount <= 0n) {
     return { ...base, tier: "excluded", reason: "no-funds-to-worker", amountMicro: amount };
   }
-  if (p.payer === p.worker) {
-    // Worker paying their own link — a cycle, not income.
+  if (p.payer === p.worker && p.linkSlug) {
+    // Worker paying through their own link — a cycle attempt, not income.
     return { ...base, tier: "excluded", reason: "self-payment-cycle", amountMicro: amount };
   }
-  if (p.referenceOk && p.linkSlug) {
+  if (p.referenceOk && p.linkSlug && p.payer !== p.worker) {
     return {
       ...base,
       tier: "T1",
@@ -58,6 +58,7 @@ export function classifyPayment(p: PaymentFactInput): ClassifiedPayment {
     };
   }
   // Funds arrived but the payer cannot be tied to a checkout — savings bucket.
+  // Includes the worker's own unreferenced deposits (T3 spec: depósitos propios).
   return { ...base, tier: "T3", reason: "deposit-no-payer-proof", amountMicro: amount };
 }
 

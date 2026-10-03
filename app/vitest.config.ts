@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // WebCrypto keypair generation is slow on this machine
+    testTimeout: 60_000,
     env: {
       // keep test DB isolated and in-memory
       CLARO_DB: ":memory:",

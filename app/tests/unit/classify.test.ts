@@ -60,7 +60,7 @@ describe("classifyPayment — 3-tier evidence model", () => {
     expect(c.reason).toBe("no-funds-to-worker");
   });
 
-  it("excluded: self-deposit with reference still not income", () => {
+  it("T3: worker's own unreferenced deposit is savings, not income", () => {
     const c = classifyPayment({
       signature: "sig5",
       payer: WORKER,
@@ -69,7 +69,8 @@ describe("classifyPayment — 3-tier evidence model", () => {
       referenceOk: false,
       linkSlug: null,
     });
-    expect(c.tier).toBe("excluded");
+    expect(c.tier).toBe("T3");
+    expect(c.reason).toBe("deposit-no-payer-proof");
     expect(isIncome(c)).toBe(false);
   });
 });

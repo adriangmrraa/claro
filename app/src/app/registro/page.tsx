@@ -14,6 +14,7 @@ import {
   isValidSecretB58,
   saveSecret,
 } from "@/lib/wallet";
+import { Wordmark } from "@/components/brand";
 
 type Step = "email" | "import" | "done";
 
@@ -110,8 +111,10 @@ export default function RegistroPage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">CLARO</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <div className="flex justify-center">
+            <Wordmark size="lg" />
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
             Tu historial de cobros es tu prueba de ingresos.
           </p>
         </div>

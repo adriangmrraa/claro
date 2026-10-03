@@ -59,3 +59,10 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
   - ancla firmada por el trabajador: `54pAZXu66KXpWwKTA5pQrnfy4xi71qv9pdDnjHy66axU9Lr5ZSvRUe9uw6Tc96jMxRoA71Ji3etwCpbpZLCTEoi3`
   - verificación pública OK — TODAS las txs son visibles en explorer.solana.com/?cluster=devnet
 - **Pendiente:** verificar presencia de página pública de perfil (pedido del usuario), VERIFY + ARCHIVE final.
+
+## Sesión 3 — Worker demo sembrado + pulido UX/UI — 03/10/2026
+
+- **Worker demo (devnet real):** `demo@claro.lat` → `7N2sfV6XyxY5fvp2teBgwdMrK6nRQ7ixssPaTxrPbcx2`. Script `scripts/seed_demo_worker.ts` (2 fases: create → --finish). Credenciales en `app/data/demo_worker.json` (gitignored). Login en demo: email + "Ya tengo una clave de acceso" (import).
+- **Seed onchain real:** 8 cobros USDC de 5 pagadores distintos ($180/95/220/150/75/310/140/205) + depósito T3 $400 sin referencia → clasifica "ahorro, no ingreso". Link `/pagar/ALDjg0Iaz-4`. Informe anclado por el worker: `/verificar/bK37sXPYfUI` (ancla `5BCXtf4Lbzkb6qAXhhq9amA71ra2hBtNtKzgzmBeKFPNcJ8HyFPvyaGpAJgj9y6ciLPRbeW7FFhXPPLzMKHGnxg5`).
+- **UX/UI:** tema esmeralda+papel en globals.css, Space Grotesk (font-heading), `components/brand.tsx` (LogoMark+Wordmark), landing rediseñada (hero gradiente, 3 pasos, link al mint en explorer), wordmark en registro/dashboard/cobrar/informes/verificar/pagar, back-nav consistente.
+- **Verificación:** tsc 0 · eslint 0 · `next build` 18 rutas OK · páginas clave 200 con links explorer reales.

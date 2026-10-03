@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { isExpired, listReportsByOwner } from "@/lib/reports";
 import { txUrl } from "@/lib/explorer";
+import { Wordmark } from "@/components/brand";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportActions } from "./report-actions";
@@ -16,11 +17,12 @@ export default async function InformesPage() {
     <main className="flex min-h-screen flex-col p-6">
       <div className="mx-auto w-full max-w-md space-y-6 pt-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">Mis informes</h1>
+          <Wordmark size="sm" href="/app" />
           <Link href="/app" className="text-sm text-muted-foreground hover:underline">
             Volver
           </Link>
         </div>
+        <h1 className="font-heading text-2xl font-bold tracking-tight">Mis informes</h1>
 
         <Link href="/app/informe/nuevo" className={buttonVariants({ className: "w-full" })}>
           Generar nuevo informe

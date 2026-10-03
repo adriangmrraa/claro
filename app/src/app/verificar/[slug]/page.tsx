@@ -3,6 +3,7 @@ import { getReportBySlug, verifyReport } from "@/lib/reports";
 import { formatUsdc } from "@/lib/money";
 import { txUrl } from "@/lib/explorer";
 import type { ReportFacts } from "@/lib/report";
+import { Wordmark } from "@/components/brand";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const STATUS_UI: Record<string, { title: string; sub: string; cls: string }> = {
@@ -54,10 +55,15 @@ export default async function VerificarPage({
     <main className="flex min-h-screen flex-col items-center p-6">
       <div className="w-full max-w-lg space-y-6 pt-8">
         <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            CLARO · verificación de informe
+          <div className="flex justify-center">
+            <Wordmark size="md" />
+          </div>
+          <p className="mt-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Verificación de informe
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">Prueba de ingresos</h1>
+          <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight">
+            Prueba de ingresos
+          </h1>
         </div>
 
         <div className={`rounded-xl border p-4 text-center ${ui.cls}`}>
@@ -74,19 +80,23 @@ export default async function VerificarPage({
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <p className="text-xs text-muted-foreground">Recibió en {facts.periodMonths} meses</p>
-                  <p className="text-xl font-bold">${formatUsdc(BigInt(facts.income.totalMicro))}</p>
+                  <p className="font-heading text-xl font-bold">
+                    ${formatUsdc(BigInt(facts.income.totalMicro))}
+                  </p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <p className="text-xs text-muted-foreground">Promedio mensual</p>
-                  <p className="text-xl font-bold">${formatUsdc(BigInt(facts.income.monthlyAvgMicro))}</p>
+                  <p className="font-heading text-xl font-bold">
+                    ${formatUsdc(BigInt(facts.income.monthlyAvgMicro))}
+                  </p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <p className="text-xs text-muted-foreground">Pagadores distintos</p>
-                  <p className="text-xl font-bold">{facts.income.payerCount}</p>
+                  <p className="font-heading text-xl font-bold">{facts.income.payerCount}</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3 text-center">
                   <p className="text-xs text-muted-foreground">Cobros verificados</p>
-                  <p className="text-xl font-bold">{facts.income.paymentCount}</p>
+                  <p className="font-heading text-xl font-bold">{facts.income.paymentCount}</p>
                 </div>
               </div>
               {facts.savings.depositCount > 0 && (

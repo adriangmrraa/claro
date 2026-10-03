@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoutButton } from "./logout-button";
 import { SyncButton } from "./sync-button";
+import { Wordmark } from "@/components/brand";
 
 const TIER_LABEL: Record<string, { text: string; className: string }> = {
   T1: { text: "Ingreso verificado", className: "bg-green-100 text-green-800" },
@@ -42,7 +43,7 @@ export default async function AppPage() {
     <main className="flex min-h-screen flex-col p-6">
       <div className="mx-auto w-full max-w-md space-y-6 pt-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">CLARO</h1>
+          <Wordmark size="md" />
           <LogoutButton />
         </div>
 
@@ -78,13 +79,13 @@ export default async function AppPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-green-50 p-3 text-center">
                   <p className="text-xs text-green-800">Ingresos verificados</p>
-                  <p className="text-lg font-bold text-green-900">
+                  <p className="font-heading text-lg font-bold text-green-900">
                     ${formatUsdc(incomeTotal)}
                   </p>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-3 text-center">
                   <p className="text-xs text-slate-600">Ahorros (no es ingreso)</p>
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="font-heading text-lg font-bold text-slate-800">
                     ${formatUsdc(savingsTotal)}
                   </p>
                 </div>

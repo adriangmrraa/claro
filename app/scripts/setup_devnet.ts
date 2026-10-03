@@ -8,6 +8,7 @@
 import {
   appendTransactionMessageInstructions,
   assertIsTransactionWithBlockhashLifetime,
+  createKeyPairSignerFromPrivateKeyBytes,
   createSolanaRpc,
   createSolanaRpcSubscriptions,
   createTransactionMessage,
@@ -143,6 +144,18 @@ function writeEnvLocal(vars: Record<string, string>) {
   console.log(`  wrote ${ENV_FILE}`);
 }
 
+// Reads .env.local so a pre-funded CLARO_MINT_AUTHORITY_SECRET (e.g. funded
+// manually via https://faucet.solana.com) is picked up — skips the airdrop.
+function readEnvLocal(): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!existsSync(ENV_FILE)) return map;
+  for (const line of readFileSync(ENV_FILE, "utf8").split("\n")) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m) map.set(m[1], m[2]);
+  }
+  return map;
+}
+
 async function main() {
   const force = process.argv.includes("--force");
   if (existsSync(DATA_FILE) && !force) {
@@ -153,14 +166,30 @@ async function main() {
   console.log(`CLARO devnet setup — ${RPC_URL}`);
 
   // extractable: demo secrets are exported to .env.local (devnet only).
-  const mintAuthority = await generateKeyPairSigner(true);
+  const envLocal = readEnvLocal();
+  const prefundedSecret =
+    process.env.CLARO_MINT_AUTHORITY_SECRET ?? envLocal.get("CLARO_MINT_AUTHORITY_SECRET");
+  const mintAuthority = prefundedSecret
+    ? await createKeyPairSignerFromPrivateKeyBytes(bs58.decode(prefundedSecret))
+    : await generateKeyPairSigner(true);
   const mint = await generateKeyPairSigner(true);
-  console.log(`mint authority: ${mintAuthority.address}`);
+  console.log(`mint authority: ${mintAuthority.address}${prefundedSecret ? " (pre-funded)" : ""}`);
   console.log(`mint account:   ${mint.address}`);
 
-  // Single faucet dependency: only the authority needs airdropped SOL.
+  // Single faucet dependency: only the authority needs SOL.
   // It then funds every payer via a normal transfer inside their funding tx.
-  await airdropWithRetry(mintAuthority.address, 3, "mint-authority");
+  if (prefundedSecret) {
+    const { value: balance } = await rpc.getBalance(mintAuthority.address).send();
+    console.log(`  authority balance: ${Number(balance) / 1e9} SOL`);
+    if (balance < 2_000_000_000n) {
+      throw new Error(
+        `Authority has ${Number(balance) / 1e9} SOL — needs ~2 SOL. ` +
+          `Fund ${mintAuthority.address} via https://faucet.solana.com and re-run.`
+      );
+    }
+  } else {
+    await airdropWithRetry(mintAuthority.address, 3, "mint-authority");
+  }
 
   const rentExempt = await rpc.getMinimumBalanceForRentExemption(BigInt(getMintSize())).send();
   const mintSig = await sendTx(mintAuthority, [

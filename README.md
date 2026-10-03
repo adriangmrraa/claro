@@ -18,3 +18,17 @@ De cobrar en negro → a cobrar en CLARO.
 ## Restricciones duras
 
 Devnet solamente · cero PII onchain · no lending · no token · no score opaco · nada público por defecto · cero jerga crypto en UI.
+
+## Desarrollo
+
+La app vive en `app/` (Next.js 16 + React 19 + Tailwind 4 + `@solana/kit` 8).
+
+```bash
+cd app
+cp .env.local.example .env.local   # completar tras correr el setup
+npm install
+npx tsx scripts/setup_devnet.ts    # crea mint + payer pool en devnet, escribe .env.local
+npm run dev                        # http://localhost:3000
+```
+
+Verificación: `npm test` (vitest) · `npx tsc --noEmit` · `npx eslint src tests` · `npm run build`.

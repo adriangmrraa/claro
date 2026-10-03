@@ -14,3 +14,14 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
 - **Continuación (misma sesión, modo automático):** fases documentales SDD completas — `sdd/changes/claro/spec.md` (R-01..R-09, CA-1..CA-14, INV-1..INV-6), `design.md` (9/9 decisiones: sin programa custom, @solana/kit 8 tx v1, reference-as-account Solana Pay, memo-anchor firmado por trabajador, node:sqlite, payer pool ×5, T2 diferido, tiempo honesto), `tasks.md` (S1..S7 verticales) + `test-plan.md`; `docs/05`, `06`, `07` escritos; commit `3c459e5` pusheado a `adriangmrraa/claro` (rebase sobre LICENSE inicial).
 - **Siguiente acción:** APPLY — S1 scaffold.
 - **Engram topic_key:** `sdd/claro/*`, `decision/claro-gate-build`.
+
+## Sesión 1 (cont.) — APPLY S1 — 03/10/2026
+
+- **Meta:** S1 — scaffold Next.js + deps + schema SQLite + lib skeleton.
+- **Tareas ejecutadas:** (1) `create-next-app` en `app/` (Next 16.3.8, React 19.2.8, TS, Tailwind 4, Turbopack); (2) deps instaladas — fix ERESOLVE subiendo `@types/node` a ^22 (vitest 5 lo exige); shadcn init (button + utils); (3) `lib/`: env, db (4 tablas), auth (cookie HMAC), solana (kit 8: sendUsdcPayment con reference+memo, inspectPayment para verificación), classify (3 tiers puro), report (canonical JSON + sha256); (4) vitest config + 14 tests unitarios; (5) docs Next 16 consultadas (params Promise, cookies async, RouteContext) por regla AGENTS de la app.
+- **Pruebas y resultado REAL:** `vitest run` **14/14 ✓** · `tsc --noEmit` ✓ (tras typegen + target ES2022) · `eslint` ✓ · `next build` ✓ (2.9min compile).
+- **Decisiones técnicas verificadas en código:** (a) keypair signers de kit NO son TransactionSendingSigner → patrón `signTransactionMessageWithSigners` + `sendAndConfirmTransactionFactory` (único válido server-side); (b) `assertIsTransactionWithBlockhashLifetime` para el narrowing de lifetime; (c) secrets de demo = base58(PKCS8-DER); (d) worker keypair NUNCA server-side (spec S3/CA-1) — encrypt/decrypt descartado como dead code.
+- **ADR registrado:** better-sqlite3 (prebuild OK) reemplaza `node:sqlite` del design (flag experimental en Node 22) → DECISIONS.md.
+- **Bloqueos:** ninguno.
+- **Siguiente acción:** S2 — setup_devnet.ts contra devnet real.
+- **Engram topic_key:** `sdd/claro/apply`.

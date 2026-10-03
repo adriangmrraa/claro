@@ -12,11 +12,17 @@ target/
 .env
 .env.*
 !.env.example
+!.env.local.example
+!**/.env.local.example
 *.pem
 keys/
 keypairs/
 *-keypair.json
 id.json
+
+# App data (SQLite, devnet fixture)
+app/data/
+data/
 
 # OS / editor
 .DS_Store

@@ -105,7 +105,9 @@ async function airdropWithRetry(to: Address, sol: number, label: string): Promis
       return;
     } catch (e) {
       const wait = AIRDROP_WAIT_S > 0 ? AIRDROP_WAIT_S : attempt * 5;
-      console.warn(`  airdrop ${label} attempt ${attempt}/${AIRDROP_MAX_ATTEMPTS} failed, retrying in ${wait}s…`);
+      console.warn(
+        `  airdrop ${label} attempt ${attempt}/${AIRDROP_MAX_ATTEMPTS} failed (${e instanceof Error ? e.message.slice(0, 120) : e}), retrying in ${wait}s…`
+      );
       await sleep(wait * 1000);
     }
   }
@@ -148,8 +150,8 @@ async function main() {
   console.log(`CLARO devnet setup — ${RPC_URL}`);
 
   // extractable: demo secrets are exported to .env.local (devnet only).
-  const mintAuthority = await generateKeyPairSigner({ extractable: true });
-  const mint = await generateKeyPairSigner({ extractable: true });
+  const mintAuthority = await generateKeyPairSigner(true);
+  const mint = await generateKeyPairSigner(true);
   console.log(`mint authority: ${mintAuthority.address}`);
   console.log(`mint account:   ${mint.address}`);
 
@@ -177,7 +179,7 @@ async function main() {
 
   const payers: { address: string; ata: string; secret: string; fundSig: string }[] = [];
   for (let i = 0; i < PAYER_COUNT; i++) {
-    const payer = await generateKeyPairSigner({ extractable: true });
+    const payer = await generateKeyPairSigner(true);
     const [ata] = await findAssociatedTokenPda({
       mint: mint.address,
       owner: payer.address,

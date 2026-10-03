@@ -37,7 +37,7 @@ export async function exportSecretB58(signer: KeyPairSigner): Promise<string> {
 
 export async function generateWorkerWallet(): Promise<WorkerWallet> {
   // extractable: the user must be able to back up / export the key (CA-1).
-  const signer = await generateKeyPairSigner({ extractable: true });
+  const signer = await generateKeyPairSigner(true);
   return { address: signer.address, secretB58: await exportSecretB58(signer) };
 }
 

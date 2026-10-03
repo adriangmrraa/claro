@@ -34,6 +34,7 @@ import {
   getTransferCheckedInstruction,
   TOKEN_PROGRAM_ADDRESS,
 } from "@solana-program/token";
+import { getTransferSolInstruction } from "@solana-program/system";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import bs58 from "bs58";
 import { env } from "./env";
@@ -101,6 +102,40 @@ export async function usdcBalanceMicro(owner: Address): Promise<bigint> {
   }
 }
 
+export async function solBalanceLamports(owner: Address): Promise<bigint> {
+  const { value } = await rpc.getBalance(owner).send();
+  return value;
+}
+
+// SOL transfer for worker fee grants (worker signs anchors but holds no SOL).
+export async function sendSolTransfer(params: {
+  from: KeyPairSigner;
+  to: Address;
+  amountLamports: bigint;
+}): Promise<string> {
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+  const message = pipe(
+    createTransactionMessage({ version: 0 }),
+    (m) => setTransactionMessageFeePayerSigner(params.from, m),
+    (m) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, m),
+    (m) =>
+      appendTransactionMessageInstructions(
+        [
+          getTransferSolInstruction({
+            source: params.from,
+            destination: params.to,
+            amount: params.amountLamports,
+          }),
+        ],
+        m
+      )
+  );
+  const signedTx = await signTransactionMessageWithSigners(message);
+  assertIsTransactionWithBlockhashLifetime(signedTx);
+  await sendAndConfirm(signedTx, { commitment: "confirmed" });
+  return getSignatureFromTransaction(signedTx);
+}
+
 // --- payment transactions ---
 
 export interface UsdcPaymentInput {
@@ -165,20 +200,22 @@ export async function sendUsdcPayment(input: UsdcPaymentInput): Promise<string> 
 
 export interface ParsedPayment {
   signature: string;
-  referenceOk: boolean;
+  /** the expected reference found among the tx account keys, or null */
+  matchedReference: string | null;
   hasMemoProgram: boolean;
   memoText: string | null;
   tokenDeltaToWorker: bigint | null;
   payerAddress: string | null;
+  blockTime: number | null;
   confirmed: boolean;
 }
 
-// Re-derives the payment facts on-chain: signature exists and confirmed, the
-// Solana Pay reference is among the tx account keys, and USDC moved into the
-// worker's ATA for the claimed amount.
+// Re-derives the payment facts on-chain: signature exists and confirmed, a
+// known Solana Pay reference is among the tx account keys, and USDC moved
+// into the worker's ATA. One RPC call per tx — references matched locally.
 export async function inspectPayment(params: {
   signature: string;
-  expectedReference: string;
+  expectedReferences?: string[];
   workerAddress: string;
 }): Promise<ParsedPayment> {
   const tx = await rpc
@@ -191,11 +228,12 @@ export async function inspectPayment(params: {
 
   const empty: ParsedPayment = {
     signature: params.signature,
-    referenceOk: false,
+    matchedReference: null,
     hasMemoProgram: false,
     memoText: null,
     tokenDeltaToWorker: null,
     payerAddress: null,
+    blockTime: null,
     confirmed: false,
   };
   if (!tx || tx.meta?.err) return empty;
@@ -205,7 +243,8 @@ export async function inspectPayment(params: {
   );
   const workerAta = (await usdcAta(address(params.workerAddress))).toString();
   const mintStr = usdcMint().toString();
-  const referenceOk = accountKeys.includes(params.expectedReference);
+  const matchedReference =
+    (params.expectedReferences ?? []).find((r) => accountKeys.includes(r)) ?? null;
   const payerAddress = accountKeys[0] ?? null;
 
   // USDC delta into the worker ATA via token balance diffs (authoritative).
@@ -240,11 +279,12 @@ export async function inspectPayment(params: {
 
   return {
     signature: params.signature,
-    referenceOk,
+    matchedReference,
     hasMemoProgram,
     memoText,
     tokenDeltaToWorker: tokenDelta,
     payerAddress,
+    blockTime: tx.blockTime ? Number(tx.blockTime) : null,
     confirmed: true,
   };
 }

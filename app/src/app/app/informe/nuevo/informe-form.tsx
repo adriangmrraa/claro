@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { anchorReportOnChain } from "@/lib/anchor";
+import { txUrl } from "@/lib/explorer";
 
 type Phase = "scope" | "anchoring" | "done";
 
@@ -18,6 +19,7 @@ export function InformeForm() {
   const [error, setError] = useState("");
   const [url, setUrl] = useState("");
   const [anchored, setAnchored] = useState(false);
+  const [anchorSig, setAnchorSig] = useState("");
   const [copied, setCopied] = useState(false);
 
   async function onGenerate(e: React.FormEvent) {
@@ -44,6 +46,7 @@ export function InformeForm() {
           body: JSON.stringify({ signature: sig }),
         });
         setAnchored(reg.ok);
+        if (reg.ok) setAnchorSig(sig);
       } catch {
         setAnchored(false); // report still valid; anchor can be retried
       }
@@ -61,9 +64,14 @@ export function InformeForm() {
         <CardContent className="space-y-4 pt-6">
           <p className="text-center font-medium">Tu informe está listo</p>
           {anchored ? (
-            <p className="rounded-lg bg-green-50 p-3 text-center text-xs text-green-800">
-              Anclado en blockchain — sellado contra modificaciones.
-            </p>
+            <a
+              href={txUrl(anchorSig)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-lg bg-green-50 p-3 text-center text-xs text-green-800 underline-offset-4 hover:underline"
+            >
+              Anclado en blockchain — sellado contra modificaciones. Ver la transacción →
+            </a>
           ) : (
             <p className="rounded-lg bg-amber-50 p-3 text-center text-xs text-amber-800">
               Sin anclaje onchain — el informe funciona igual, pero quien lo verifique

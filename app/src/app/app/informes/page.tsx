@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { isExpired, listReportsByOwner } from "@/lib/reports";
+import { txUrl } from "@/lib/explorer";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportActions } from "./report-actions";
@@ -64,10 +65,22 @@ export default async function InformesPage() {
                           {status.text}
                         </span>
                       </div>
-                      <ReportActions
-                        slug={r.slug}
-                        revoked={!!r.revoked_at || expired}
-                      />
+                      <div className="flex items-center gap-3">
+                        <ReportActions
+                          slug={r.slug}
+                          revoked={!!r.revoked_at || expired}
+                        />
+                        {r.anchor_sig && (
+                          <a
+                            href={txUrl(r.anchor_sig)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary underline-offset-4 hover:underline"
+                          >
+                            ver anclaje →
+                          </a>
+                        )}
+                      </div>
                     </li>
                   );
                 })}

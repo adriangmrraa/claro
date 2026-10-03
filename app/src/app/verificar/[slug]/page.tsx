@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getReportBySlug, verifyReport } from "@/lib/reports";
 import { formatUsdc } from "@/lib/money";
-import { env } from "@/lib/env";
+import { txUrl } from "@/lib/explorer";
 import type { ReportFacts } from "@/lib/report";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -47,7 +47,6 @@ export default async function VerificarPage({
   const verification = await verifyReport(report);
   const ui = STATUS_UI[verification.status];
   const facts = JSON.parse(report.facts_json) as ReportFacts;
-  const explorerBase = `https://explorer.solana.com/tx/`;
 
   const showFacts = verification.status === "valid" || verification.status === "unanchored";
 
@@ -134,7 +133,7 @@ export default async function VerificarPage({
             </ul>
             {report.anchor_sig && (
               <a
-                href={`${explorerBase}${report.anchor_sig}?cluster=${env.cluster}`}
+                href={txUrl(report.anchor_sig)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 block text-center text-xs text-primary underline-offset-4 hover:underline"
@@ -164,7 +163,7 @@ export default async function VerificarPage({
                       </p>
                     </div>
                     <a
-                      href={`${explorerBase}${e.signature}?cluster=${env.cluster}`}
+                      href={txUrl(e.signature)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-primary underline-offset-4 hover:underline"

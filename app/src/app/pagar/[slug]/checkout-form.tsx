@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { parseUsdc } from "@/lib/money";
+import { txUrl } from "@/lib/explorer";
 
 type State = "form" | "paying" | "done" | "error";
 
@@ -61,8 +62,16 @@ export function CheckoutForm({
           <p className="text-sm text-muted-foreground">
             El cobro quedó registrado y es verificable.
           </p>
-          <p className="break-all rounded-lg bg-muted p-3 font-mono text-xs">
+          <a
+            href={txUrl(signature)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block break-all rounded-lg bg-muted p-3 font-mono text-xs text-primary underline-offset-4 hover:underline"
+          >
             {signature.slice(0, 20)}…{signature.slice(-8)}
+          </a>
+          <p className="text-xs text-muted-foreground">
+            Tocá la firma para ver la transacción real en Solana Explorer.
           </p>
         </CardContent>
       </Card>

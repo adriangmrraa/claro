@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { listLinksByOwner } from "@/lib/links";
 import { db, type TxCacheRow } from "@/lib/db";
 import { formatUsdc } from "@/lib/money";
+import { txUrl } from "@/lib/explorer";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoutButton } from "./logout-button";
@@ -108,6 +109,14 @@ export default async function AppPage() {
                           {t.ts ? new Date(t.ts).toLocaleDateString("es-AR") : "—"}
                           {t.payer ? ` · de ${t.payer.slice(0, 4)}…${t.payer.slice(-4)}` : ""}
                         </p>
+                        <a
+                          href={txUrl(t.sig)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary underline-offset-4 hover:underline"
+                        >
+                          ver en explorer →
+                        </a>
                       </div>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${tier.className}`}

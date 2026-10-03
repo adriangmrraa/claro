@@ -249,7 +249,7 @@ async function main() {
   const envVars = {
     CLARO_USDC_MINT: mint.address,
     NEXT_PUBLIC_USDC_MINT: mint.address,
-    CLARO_MINT_AUTHORITY_SECRET: await exportSecretB58(mintAuthority),
+    CLARO_MINT_AUTHORITY_SECRET: prefundedSecret ?? (await exportSecretB58(mintAuthority)),
     CLARO_PAYER_SECRETS: payers.map((p) => p.secret).join(","),
   };
   writeEnvLocal(envVars);

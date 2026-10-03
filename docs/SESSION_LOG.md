@@ -46,3 +46,16 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
 - **E2E VERIFICADO REAL (surfpool fork devnet):** `scripts/e2e_localnet.ts` — los 7 beats completos: sesión+cookie, wallet solo-pubkey, link con reference, checkout público, **2 pagos USDC reales confirmados onchain de payers distintos** (`27nHe2TNGk…`, `MLTP2Ea3z…`), sync clasificando 2 txs, informe con hash `b8404a0c…`, **ancla memo firmada por el trabajador onchain** (`5rfwuShD…`), página `/verificar` con todos los checks. Commit `027aabf`.
 - **Nota honesta:** las txs verificadas son REALES pero en surfnet local (fork de devnet), NO en devnet público — explorer público no las muestra. Falta: SOL devnet real → mismo setup + e2e contra `api.devnet.solana.com`.
 - **Siguiente acción:** captcha faucet.solana.com para mint authority → `setup_devnet.ts` (apuntando a devnet) → `e2e_localnet.ts` con `E2E_BASE_URL` + RPC devnet → VERIFY + ARCHIVE.
+
+## Sesión 2 — E2E REAL EN DEVNET — 03/10/2026
+
+- **Desbloqueo:** usuario fondeó manualmente 5 SOL devnet a la autoridad `EHTi9z86JAdxi6dCrvydXzRTUkaXEgphshZkTCESWbtf` (faucet RPC globalmente 429 — el setup ahora acepta `CLARO_MINT_AUTHORITY_SECRET` pre-fondeado, commit `e69a60f`).
+- **Setup devnet real:** mint CLARO-TEST-USDC `F213GtRA4bZDAHY7bpDYyhtKj67ynV6UWRLfkyHgXG4C` (6 dec, supply 50k), creado en tx `517phmGuhG3yb47AZ4hZAxNLa2tARMznCDAvRDDPKeiMo6zdAoQzPNEvwVw9nXmJfrNQLPVv8tG4VbjmarA4Hyr2`; 5 payers con 10k USDC c/u (txs públicas).
+- **E2E COMPLETO EN DEVNET REAL** (`e2e_localnet.ts` contra api.devnet.solana.com):
+  - worker `BEmpqUDV3qXaPhqxYBR9EAW3LspQn5tZHVwmAQusTfRx`, link `/pagar/-xhFKZY4nkQ`
+  - pago 1: `CKJAsqegcZnGEEtiecNYTndeYtyrEj8ftF1RhinuZc33i7qa4f6565KZnCfNKMjF69UrNRNrK1kQPMThNAL15eC` — memo onchain `CLARO:PAY:-xhFKZY4nkQ`, err:null
+  - pago 2: `21wH7RGe9tiyLEPui4u9gTxvfR17h62XcYcxuXHkSWMai1ERLFg348v2b3fp3EGojNKRZCyYm9hgdcCsry19Vi9Q`
+  - informe `/verificar/A3LbSdNCJmI` hash `69ca860f…`
+  - ancla firmada por el trabajador: `54pAZXu66KXpWwKTA5pQrnfy4xi71qv9pdDnjHy66axU9Lr5ZSvRUe9uw6Tc96jMxRoA71Ji3etwCpbpZLCTEoi3`
+  - verificación pública OK — TODAS las txs son visibles en explorer.solana.com/?cluster=devnet
+- **Pendiente:** verificar presencia de página pública de perfil (pedido del usuario), VERIFY + ARCHIVE final.

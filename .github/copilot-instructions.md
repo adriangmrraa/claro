@@ -1,0 +1,2 @@
+# GitHub Copilot — adaptador
+Leer `AGENTS.md`, `PROJECT_STATE.md`, `harness/INSTALLATION_GUIDE.md` y `harness/SDD_PLAYBOOK.md` antes de proponer cambios. SDD local en `.agents/skills/formosa-sdd-*/SKILL.md`; seguir como procedimientos aunque no haya slash commands. Research Gate `docs/04_RESEARCH_GATE.md`: no implementar MVP sin decisión humana `APROBADO`. Engram auxiliar y no fuente principal. No instalar sin consentimiento ni exponer secretos.

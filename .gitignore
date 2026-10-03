@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+dist/
+out/
+build/
+target/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+keys/
+keypairs/
+*-keypair.json
+id.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Test/validator artifacts
+test-ledger/
+.anchor/

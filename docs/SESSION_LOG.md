@@ -25,3 +25,14 @@ Plantilla: fecha | meta | máquina y acceso real | archivos revisados | tareas e
 - **Bloqueos:** ninguno.
 - **Siguiente acción:** S2 — setup_devnet.ts contra devnet real.
 - **Engram topic_key:** `sdd/claro/apply`.
+
+## Sesión 1 (cont. 2) — APPLY S2→S7 — 03/10/2026
+
+- **Meta:** completar los slices restantes del change claro en modo automático.
+- **Tareas ejecutadas:** (S2) `scripts/setup_devnet.ts` — mint CLARO-TEST-USDC 6dec + payer pool ×5; refactor a UN solo airdrop (autoridad fondea payers por transfers, crea ATAs y mintea USDC); retries configurables `AIRDROP_MAX_ATTEMPTS/AIRDROP_WAIT_S`. (S3) `POST /api/session` cookie HMAC httpOnly; `/registro` con keygen client-side (`generateKeyPairSigner(true)` + seed 32B), backup/import base58, QR; `/app` protegido; landing. (S4) `lib/links.ts` + `POST /api/links` (reference única Solana Pay); `/pagar/[slug]` checkout público simulado; `POST /api/checkout/pay` con payer pool server-side y errores limpios (`pool-missing` CA-13). (S5) `POST /api/history/sync` incremental (getSignaturesForAddress → 1 fetch/tx → match reference local → classify → tx_cache); dashboard con totales ingreso/ahorro + badges T1/T3. (S6) `lib/reports.ts` canonical facts + sha256; `POST /api/reports`; ancla `CLARO-RPT:v1:<hash>` en memo FIRMADA POR EL TRABAJADOR (client `lib/anchor.ts`, fee grant `api/reports/anchor-fee`); revocación; `/verificar/[slug]` público con checks onchain live. (S7) `scripts/seed_history.ts` (8 cobros de 5 pagadores + 1 depósito T3) + runbook de 7 beats en README.
+- **Fixes técnicos:** `generateKeyPairSigner(true)` positional (extractable); `createKeyPairSignerFromPrivateKeyBytes` necesita seed crudo 32B no PKCS8-DER (extraído vía índices DER); classify: auto-depósito sin referencia de link = T3 ahorro (no ciclo excluido — ciclo solo si paga SU link); `buttonVariants` patrón Base UI (Button nuevo sin asChild); `isExpired` helper server-side (Date.now impuro en render); `useRouter` vs window.location; vitest testTimeout 60s (WebCrypto lento).
+- **Pruebas y resultado REAL:** vitest **22/22 ✓** · `tsc --noEmit` ✓ · `eslint` ✓ · `next build` ✓ (18 rutas). Smoke local: link creado (slug+reference), `/pagar` 200, checkout → `{"code":"pool-missing"}` limpio.
+- **Bloqueos:** **faucet devnet público 429 global** — sin SOL real: S2 setup NO completado, checkout real NO verificado, seed NO corrido. Bypass documentado (faucet.solana.com captcha → mint authority → re-run).
+- **Commits:** `4d33e75` (S1), `48dbd8f` (S3), `d71177a` (S4+S5+S6), `6eda814` (S7) — todos pusheados a `adriangmrraa/claro` main.
+- **Siguiente acción:** conseguir SOL devnet → setup_devnet.ts → E2E real → VERIFY + ARCHIVE.
+- **Engram topic_key:** `sdd/claro/apply`.

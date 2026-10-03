@@ -54,8 +54,8 @@ const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions 
 
 // --- signers (devnet demo only; worker keys are client-side, never here) ---
 
-// Secrets in env are base58-encoded PKCS#8 DER private key bytes, as exported
-// by `crypto.subtle.exportKey("pkcs8", keyPair.privateKey)` in setup_devnet.ts.
+// Secrets in env are base58-encoded raw 32-byte Ed25519 seeds, as written by
+// scripts/setup_devnet.ts (pkcs8 DER sliced down to the seed).
 export async function signerFromSecretB58(secretB58: string): Promise<KeyPairSigner> {
   return createKeyPairSignerFromPrivateKeyBytes(bs58.decode(secretB58));
 }
